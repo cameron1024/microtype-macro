@@ -2,6 +2,8 @@
 name = "microtype-macro"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Proc macro for generating microtypes"
 
 [lib]
 proc-macro = true
