@@ -130,8 +130,18 @@ mod tests {
 
     #[test]
     fn parse_full_macro() {
-        let microtype: MicrotypeMacro =
-            parse_str("#[foo] out secret String { Email }, i64 { Age } ").unwrap();
+        let microtype: MicrotypeMacro = parse_str(
+            r#"
+#[foo]
+out secret String {
+    Email
+}
+i64 {
+    Age
+}
+"#,
+        )
+        .unwrap();
 
         assert_eq!(microtype.0.len(), 2);
         let first = &microtype.0[0];

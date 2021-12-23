@@ -59,10 +59,4 @@ mod tests {
         assert_eq!(second.name.to_string(), "Username");
         assert_eq!(second.secrecy, Secrecy::Secret);
     }
-
-    #[test]
-    fn is_test() {
-        assert!(cfg!(test));
-        assert!(cfg!(feature = "serde_support"));
-    }
 }

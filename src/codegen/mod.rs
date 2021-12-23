@@ -1,5 +1,4 @@
 use proc_macro::TokenStream;
-use quote::quote;
 
 use crate::{model::Microtype, parse::Secrecy};
 
@@ -32,32 +31,3 @@ fn generate_single(
     }
 }
 
-fn serde_transparent() -> Option<proc_macro2::TokenStream> {
-    let serde = cfg!(feature = "serde_support");
-    if serde {
-        Some(quote! {#[serde(transparent)]})
-    } else {
-        None
-    }
-}
-
-fn serde_serialize() -> Option<proc_macro2::TokenStream> {
-    if cfg!(feature = "serde_support") {
-        Some(quote! { #[derive(::serde::Serialize)] })
-    } else {
-        None
-    }
-}
-
-fn serde_deserialize() -> Option<proc_macro2::TokenStream> {
-    if cfg!(feature = "serde_support") {
-        Some(quote! { #[derive(::serde::Deserialize)] })
-    } else {
-        None
-    }
-}
-
-
-
-#[cfg(test)]
-mod tests {}
