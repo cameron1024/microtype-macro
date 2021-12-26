@@ -1,6 +1,6 @@
 [package]
 name = "microtype-macro"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 description = "Proc macro for generating microtypes"
@@ -8,9 +8,7 @@ description = "Proc macro for generating microtypes"
 [lib]
 proc-macro = true
 
-
 [dependencies]
-microtype-core = "0.1.4"
 quote = "1.0"
 syn = { version = "1.0", features = ["extra-traits"] }
 proc-macro2 = "1.0"
@@ -20,3 +18,4 @@ trybuild = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 
 [features]
+serde_support = []

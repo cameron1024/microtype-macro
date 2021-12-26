@@ -1,14 +1,25 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Attribute, Ident, Type};
+use super::HAS_SERDE;
 
 pub fn generate_normal(inner: Type, name: Ident, attrs: Vec<Attribute>) -> TokenStream {
+    let serde_attrs = if HAS_SERDE {
+        Some(quote! {
+            #[derive(::serde::Deserialize, ::serde::Serialize)]
+            #[serde(transparent)]
+        })
+    } else {
+        None
+    };
+
     quote! {
         #(#attrs)*
         #[repr(transparent)]
+        #serde_attrs
         pub struct #name (#inner);
 
-        impl ::microtype_core::Microtype for #name {
+        impl ::microtype::Microtype for #name {
            type Inner = String;
 
            fn new(inner: Self::Inner) -> Self {
@@ -29,14 +40,22 @@ pub fn generate_normal(inner: Type, name: Ident, attrs: Vec<Attribute>) -> Token
            }
 
 
-           fn transmute<T: ::microtype_core::Microtype<Inner = Self::Inner>>(self) -> T {
+           fn transmute<T: ::microtype::Microtype<Inner = Self::Inner>>(self) -> T {
                T::new(self.0)
            }
         }
 
-        impl From<#inner> for #name {
+        impl ::std::convert::From<#inner> for #name {
             fn from(inner: #inner) -> Self {
                 Self(inner)
+            }
+        }
+        
+        impl ::std::ops::Deref for #name {
+            type Target = #inner;
+
+            fn deref(&self) -> &Self::Target {
+                &self.0
             }
         }
     }

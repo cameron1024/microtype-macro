@@ -5,6 +5,8 @@ use crate::{model::Microtype, parse::Secrecy};
 mod normal;
 mod secret;
 
+const HAS_SERDE: bool = cfg!(feature = "serde_support");
+
 pub fn codegen(microtypes: Vec<Microtype>) -> TokenStream {
     let mut stream = TokenStream::new();
 
