@@ -74,6 +74,12 @@ pub fn generate_secret(
             }
         }
 
+        impl ::std::convert::From<#inner> for #name {
+            fn from (inner: #inner) -> #name {
+                <#name as ::microtype::SecretMicrotype>::new(inner)
+            }
+        }
+
     }
     .into()
 }
