@@ -20,7 +20,7 @@ pub fn generate_normal(inner: Type, name: Ident, attrs: Vec<Attribute>) -> Token
         pub struct #name (#inner);
 
         impl ::microtype::Microtype for #name {
-           type Inner = String;
+           type Inner = #inner;
 
            fn new(inner: Self::Inner) -> Self {
                Self(inner)
