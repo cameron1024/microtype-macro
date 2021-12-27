@@ -58,12 +58,6 @@ pub fn generate_normal(inner: Type, name: Ident, attrs: Vec<Attribute>) -> Token
                 &self.0
             }
         }
-
-        impl ::std::convert::From<#inner> for #name {
-            fn from (inner: #inner) -> #name {
-                <#name as ::microtype::Microtype>::new(inner)
-            }
-        }
     }
     .into()
 }
