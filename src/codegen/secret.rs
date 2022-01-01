@@ -1,4 +1,4 @@
-use super::HAS_SERDE;
+use super::{HAS_SERDE, HAS_TEST_IMPLS};
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Attribute, Ident, Type};
@@ -12,9 +12,43 @@ pub fn generate_secret(
     let wrapper = Ident::new(&format!("__Wrapper{}", name), name.span());
 
     let mut attrs = quote! {
-        #[derive(::std::fmt::Debug, ::std::clone::Clone)]
+        #[derive(::std::clone::Clone)]
         #[repr(transparent)]
     };
+
+    let (derive_debug, manual_impls) = if HAS_TEST_IMPLS {
+        (
+            quote! {
+                #[cfg_attr(not(test), derive(::std::fmt::Debug))]
+            },
+            quote! {
+                #[cfg(test)]
+                impl ::std::fmt::Debug for #name {
+                    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                        use ::microtype::secrecy::ExposeSecret;
+                        f.write_str(self.expose_secret())
+                    }
+                }
+
+                #[cfg(test)]
+                impl ::std::cmp::PartialEq for #name {
+                    fn eq(&self, other: &Self) -> bool {
+                        use ::microtype::secrecy::ExposeSecret;
+                        self.expose_secret().eq(other.expose_secret())
+                    }
+                }
+            },
+        )
+    } else {
+        (
+            quote! {
+                #[derive(::std::fmt::Debug)]
+            },
+            quote! {},
+        )
+    };
+
+    attrs.extend(derive_debug);
 
     if HAS_SERDE {
         attrs.extend(quote! {
@@ -58,8 +92,6 @@ pub fn generate_secret(
             }
         }
 
-
-
         #attrs
         struct #wrapper(#inner);
 
@@ -80,6 +112,7 @@ pub fn generate_secret(
             }
         }
 
+        #manual_impls
     }
     .into()
 }

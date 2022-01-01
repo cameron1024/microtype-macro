@@ -6,6 +6,7 @@ mod normal;
 mod secret;
 
 const HAS_SERDE: bool = cfg!(feature = "serde_support");
+const HAS_TEST_IMPLS: bool = cfg!(feature = "test_impls");
 
 pub fn codegen(microtypes: Vec<Microtype>) -> TokenStream {
     let mut stream = TokenStream::new();
