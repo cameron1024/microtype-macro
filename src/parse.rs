@@ -3,12 +3,26 @@ use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
     spanned::Spanned,
-    Attribute, Error, Ident, Result, Token, Type,
+    Attribute, Error, Ident, LitStr, Result, Token, Type,
 };
 
 mod kw {
     syn::custom_keyword!(secret);
     syn::custom_keyword!(out);
+}
+
+/// The `= "foo::Bar"` part of the diesel type attribute
+pub struct DieselTypeAttr {
+    pub ty: Ident,
+}
+
+impl Parse for DieselTypeAttr {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let _: Token![=] = input.parse()?;
+        let s: LitStr = input.parse()?;
+        let ty = Ident::new(&s.value(), s.span());
+        Ok(Self { ty })
+    }
 }
 
 /// The entire invocation of the macro

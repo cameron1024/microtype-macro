@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Attribute, Ident, Type};
-use super::HAS_SERDE;
+use super::{HAS_SERDE, HAS_DIESEL_IMPLS, diesel::generate_diesel_impls};
 
 pub fn generate_normal(inner: Type, name: Ident, attrs: Vec<Attribute>) -> TokenStream {
     let serde_attrs = if HAS_SERDE {
@@ -11,6 +11,12 @@ pub fn generate_normal(inner: Type, name: Ident, attrs: Vec<Attribute>) -> Token
         })
     } else {
         None
+    };
+
+    let diesel_impls = if HAS_DIESEL_IMPLS {
+        generate_diesel_impls(inner.clone(), name.clone(), &attrs, false) 
+    } else {
+        quote! {}
     };
 
     quote! {
@@ -58,6 +64,8 @@ pub fn generate_normal(inner: Type, name: Ident, attrs: Vec<Attribute>) -> Token
                 &self.0
             }
         }
+
+        #diesel_impls
     }
     .into()
 }

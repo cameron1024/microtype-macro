@@ -1,4 +1,4 @@
-use super::{HAS_SERDE, HAS_TEST_IMPLS};
+use super::{HAS_SERDE, HAS_TEST_IMPLS, HAS_DIESEL_IMPLS, diesel::generate_diesel_impls};
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Attribute, Ident, Type};
@@ -14,6 +14,12 @@ pub fn generate_secret(
     let mut attrs = quote! {
         #[derive(::std::clone::Clone)]
         #[repr(transparent)]
+    };
+
+    let diesel_impls = if HAS_DIESEL_IMPLS {
+        generate_diesel_impls(inner.clone(), name.clone(), &extra_attrs, true)
+    } else {
+        quote! {}
     };
 
     let (derive_debug, manual_impls) = if HAS_TEST_IMPLS {
@@ -113,6 +119,8 @@ pub fn generate_secret(
         }
 
         #manual_impls
+
+        #diesel_impls
     }
     .into()
 }

@@ -4,9 +4,11 @@ use crate::{model::Microtype, parse::Secrecy};
 
 mod normal;
 mod secret;
+mod diesel;
 
 const HAS_SERDE: bool = cfg!(feature = "serde_support");
 const HAS_TEST_IMPLS: bool = cfg!(feature = "test_impls");
+const HAS_DIESEL_IMPLS: bool = cfg!(feature = "diesel_impls");
 
 pub fn codegen(microtypes: Vec<Microtype>) -> TokenStream {
     let mut stream = TokenStream::new();
