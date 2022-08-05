@@ -1,4 +1,7 @@
-use super::{HAS_SERDE, HAS_TEST_IMPLS, HAS_DIESEL_IMPLS, diesel::generate_diesel_impls};
+use super::{
+    diesel::generate_diesel_impls, special_attrs::SpecialAttrs, HAS_DIESEL_IMPLS, HAS_SERDE,
+    HAS_TEST_IMPLS,
+};
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Attribute, Ident, Type};
@@ -8,6 +11,7 @@ pub fn generate_secret(
     name: Ident,
     extra_attrs: Vec<Attribute>,
     serialize: bool,
+    special_attrs: SpecialAttrs,
 ) -> TokenStream {
     let wrapper = Ident::new(&format!("__Wrapper{}", name), name.span());
 

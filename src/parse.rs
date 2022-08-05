@@ -38,35 +38,9 @@ impl Parse for MicrotypeMacro {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum Secrecy {
-    Normal,
-    OutSecret,
-    Secret,
-}
-
-impl Parse for Secrecy {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let out: Option<kw::out> = input.parse()?;
-        let secret: Option<kw::secret> = input.parse()?;
-        Ok(match (out, secret) {
-            (Some(_), Some(_)) => Secrecy::OutSecret,
-            (None, Some(_)) => Secrecy::Secret,
-            (None, None) => Secrecy::Normal,
-            (Some(out), None) => {
-                return Err(Error::new(
-                    out.span(),
-                    "Cannot be `out` without also being `secret`",
-                ))
-            }
-        })
-    }
-}
-
 /// A one-to-many mapping of inner type to any number of microtypes
 pub struct MicrotypeDecl {
     pub attrs: Vec<Attribute>,
-    pub secrecy: Secrecy,
     pub inner: Type,
     pub idents: Vec<AttrIdent>,
 }
@@ -74,7 +48,6 @@ pub struct MicrotypeDecl {
 impl Parse for MicrotypeDecl {
     fn parse(input: ParseStream) -> Result<Self> {
         let attrs = input.call(Attribute::parse_outer)?;
-        let secrecy: Secrecy = input.parse()?;
         let inner: Type = input.parse()?;
         let content;
         let _ = braced!(content in input);
@@ -83,7 +56,6 @@ impl Parse for MicrotypeDecl {
 
         Ok(Self {
             attrs,
-            secrecy,
             inner,
             idents,
         })
@@ -118,26 +90,10 @@ mod tests {
     }
 
     #[test]
-    fn parse_secrecy() {
-        let secret: Secrecy = parse_str("secret").unwrap();
-        assert_eq!(secret, Secrecy::Secret);
-
-        let out_secret: Secrecy = parse_str("out secret").unwrap();
-        assert_eq!(out_secret, Secrecy::OutSecret);
-
-        let normal: Secrecy = parse_str("").unwrap();
-        assert_eq!(normal, Secrecy::Normal);
-
-        let err: Result<Secrecy> = parse_str("out");
-        assert!(err.is_err());
-    }
-
-    #[test]
     fn parse_microtype_decl() {
         let microtype_decl: MicrotypeDecl =
             parse_str("out secret String { #[foo] Email }").unwrap();
         assert!(microtype_decl.attrs.is_empty());
-        assert_eq!(microtype_decl.secrecy, Secrecy::OutSecret);
         assert_eq!(microtype_decl.idents[0].attributes.len(), 1);
         assert_eq!(microtype_decl.idents[0].ident.to_string(), "Email");
     }
@@ -159,7 +115,6 @@ i64 {
 
         assert_eq!(microtype.0.len(), 2);
         let first = &microtype.0[0];
-        assert_eq!(first.secrecy, Secrecy::OutSecret);
         assert_eq!(first.attrs.len(), 1);
         let ty = &first.inner;
         let ty = quote::quote! {#ty};

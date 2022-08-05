@@ -1,11 +1,10 @@
 use syn::{Attribute, Ident, Type};
 
-use crate::parse::{MicrotypeMacro, Secrecy};
+use crate::parse::MicrotypeMacro;
 
 pub struct Microtype {
     pub inner: Type,
     pub name: Ident,
-    pub secrecy: Secrecy,
     pub attrs: Vec<Attribute>,
 }
 
@@ -20,7 +19,6 @@ pub fn flatten(microtype_macro: MicrotypeMacro) -> Vec<Microtype> {
                 attrs,
                 inner: decl.inner.clone(),
                 name: attr_ident.ident,
-                secrecy: decl.secrecy.clone(),
             };
 
             result.push(microtype);
@@ -40,7 +38,7 @@ mod tests {
     #[test]
     fn correctly_flattens_microtypes() {
         let microtype_macro: MicrotypeMacro =
-            parse_str("#[foo] secret String { #[bar] Email, #[baz] Username }").unwrap();
+            parse_str("#[foo] #[secret] String { #[bar] Email, #[baz] Username }").unwrap();
         let microtypes = flatten(microtype_macro);
         let first = &microtypes[0];
         let second = &microtypes[1];
@@ -50,13 +48,11 @@ mod tests {
         assert_eq!(first.attrs[0].to_token_stream().to_string(), "# [bar]");
         assert_eq!(first.inner.to_token_stream().to_string(), "String");
         assert_eq!(first.name.to_string(), "Email");
-        assert_eq!(first.secrecy, Secrecy::Secret);
 
         assert_eq!(second.attrs.len(), 2);
         assert_eq!(second.attrs[1].to_token_stream().to_string(), "# [foo]");
         assert_eq!(second.attrs[0].to_token_stream().to_string(), "# [baz]");
         assert_eq!(second.inner.to_token_stream().to_string(), "String");
         assert_eq!(second.name.to_string(), "Username");
-        assert_eq!(second.secrecy, Secrecy::Secret);
     }
 }

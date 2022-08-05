@@ -1,9 +1,16 @@
+use super::{
+    diesel::generate_diesel_impls, special_attrs::SpecialAttrs, HAS_DIESEL_IMPLS, HAS_SERDE,
+};
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Attribute, Ident, Type};
-use super::{HAS_SERDE, HAS_DIESEL_IMPLS, diesel::generate_diesel_impls};
 
-pub fn generate_normal(inner: Type, name: Ident, attrs: Vec<Attribute>) -> TokenStream {
+pub fn generate_normal(
+    inner: Type,
+    name: Ident,
+    attrs: Vec<Attribute>,
+    _special_attrs: SpecialAttrs,
+) -> TokenStream {
     let serde_attrs = if HAS_SERDE {
         Some(quote! {
             #[derive(::serde::Deserialize, ::serde::Serialize)]
@@ -14,7 +21,7 @@ pub fn generate_normal(inner: Type, name: Ident, attrs: Vec<Attribute>) -> Token
     };
 
     let diesel_impls = if HAS_DIESEL_IMPLS {
-        generate_diesel_impls(inner.clone(), name.clone(), &attrs, false) 
+        generate_diesel_impls(inner.clone(), name.clone(), &attrs, false)
     } else {
         quote! {}
     };
@@ -56,7 +63,7 @@ pub fn generate_normal(inner: Type, name: Ident, attrs: Vec<Attribute>) -> Token
                 Self(inner)
             }
         }
-        
+
         impl ::std::ops::Deref for #name {
             type Target = #inner;
 
